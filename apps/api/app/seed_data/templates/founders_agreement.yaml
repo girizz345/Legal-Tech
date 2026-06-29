@@ -1,0 +1,313 @@
+key: founders_agreement
+name: "Founders' Agreement"
+version: 2
+
+fields:
+  - id: company_name
+    label: "Company Name"
+    type: text
+    required: true
+  - id: founder_names
+    label: "Founder Names (comma-separated)"
+    type: text
+    required: true
+  - id: equity_split_summary
+    label: "Equity split (one line)"
+    type: text
+    max_length: 140
+    required: true
+    help_text: "A short plain-English description, e.g. 'split equally between two co-founders'."
+  - id: vesting_years
+    label: "Vesting period (years)"
+    type: number
+    min: 1
+    max: 10
+    required: true
+  - id: cliff_months
+    label: "Cliff period (months)"
+    type: number
+    min: 0
+    max: 24
+    required: true
+  - id: decision_making_mode
+    label: "Major decisions are made by"
+    type: select
+    options: [unanimous, majority, single_ceo]
+    required: true
+  - id: registered_office_city
+    label: "Registered office city"
+    type: text
+    required: true
+
+sections:
+  - id: equity_and_vesting_clause
+    title: "Equity Split"
+    resolution: llm_classify
+    source_field: equity_split_summary
+    variants:
+      equal_split:
+        body_template: >
+          The founders of {{ company_name }}, namely {{ founder_names }} (each a
+          "Founder"), shall hold the equity securities of {{ company_name }} in equal
+          shares as between themselves, subject always to the vesting schedule set out
+          in this Agreement. The exact number or percentage of shares to be allotted to
+          each Founder shall be as determined by the board of directors of
+          {{ company_name }} in accordance with the applicable provisions of the
+          Companies Act, 2013, and the articles of association of {{ company_name }}.
+          No Founder shall transfer, pledge, or otherwise encumber their equity
+          interest in {{ company_name }} without the prior written consent of the
+          other Founders.
+        plain_note_template: >
+          Equity is split evenly among all founders, subject to vesting. No one can
+          sell or pledge their shares without the others agreeing.
+      weighted_by_contribution:
+        body_template: >
+          The founders of {{ company_name }}, namely {{ founder_names }} (each a
+          "Founder"), shall hold equity securities of {{ company_name }} in proportions
+          reflecting each Founder's relative contribution to the company by way of
+          capital, intellectual property, skills, or time committed, as agreed
+          separately in writing between the Founders and recorded in a capitalisation
+          table appended to this Agreement. Such proportions are subject to the vesting
+          schedule set out in this Agreement. No Founder shall transfer, pledge, or
+          otherwise encumber their equity interest without the prior written consent of
+          the other Founders.
+        plain_note_template: >
+          Equity is split based on each founder's contribution (not equally). The
+          exact proportions are in a separate cap table.
+      single_majority_founder:
+        body_template: >
+          The founders of {{ company_name }}, namely {{ founder_names }} (each a
+          "Founder"), shall hold equity securities of {{ company_name }} such that one
+          Founder designated between them holds a majority interest, with the remaining
+          Founders holding minority interests in proportions as separately agreed and
+          recorded in a capitalisation table appended to this Agreement. All equity
+          holdings are subject to the vesting schedule set out in this Agreement.
+          No Founder shall transfer, pledge, or otherwise encumber their equity
+          interest without the prior written consent of the other Founders.
+        plain_note_template: >
+          One founder holds a majority stake; others hold minority interests. Exact
+          split is in a separate cap table.
+      vesting_based:
+        body_template: >
+          The founders of {{ company_name }}, namely {{ founder_names }} (each a
+          "Founder"), agree that no equity in {{ company_name }} shall be treated as
+          earned by any Founder except through the passage of time under the vesting
+          schedule set out in this Agreement, i.e., no equity is considered earned
+          solely by reason of being a founding member. The ultimate equity proportions
+          upon full vesting shall be as separately agreed and recorded in a
+          capitalisation table appended to this Agreement. No Founder shall transfer,
+          pledge, or otherwise encumber their equity interest without the prior written
+          consent of the other Founders.
+        plain_note_template: >
+          No equity is earned upfront — it is all earned over time via vesting. Final
+          proportions are in a separate cap table.
+    default_variant_id: equal_split
+
+  - id: vesting_schedule_clause
+    title: "Vesting Schedule"
+    resolution: static
+    variants:
+      default:
+        body_template: >
+          Each Founder's equity in {{ company_name }} shall be subject to a vesting
+          schedule of {{ vesting_years }} years in total, with a cliff period of
+          {{ cliff_months }} months from the vesting commencement date applicable to
+          each Founder ("Cliff Period"). No equity shall vest during the Cliff Period.
+          At the end of the Cliff Period, a proportionate tranche of the total
+          {{ vesting_years }}-year entitlement shall vest in one lump sum. Thereafter,
+          the remaining equity shall vest in equal monthly instalments over the balance
+          of the {{ vesting_years }}-year vesting period, until the Founder's equity is
+          fully vested. If a Founder ceases to be actively engaged with {{ company_name }}
+          for any reason before the end of the vesting period, unvested equity shall be
+          forfeited as set out in the Founder Exit clause. The vesting commencement date
+          for each Founder shall be specified in the annexure to this Agreement.
+        plain_note_template: >
+          Equity is earned over {{ vesting_years }} years. Nothing vests until the
+          {{ cliff_months }}-month cliff — then a lump sum vests, and the rest comes
+          monthly after that.
+    default_variant_id: default
+
+  - id: ip_assignment_clause
+    title: "IP Assignment"
+    resolution: static
+    variants:
+      default:
+        body_template: >
+          Each Founder hereby irrevocably and unconditionally assigns to
+          {{ company_name }}, with full title guarantee and free from any encumbrance,
+          all intellectual property rights (including patents, copyright, design rights,
+          trade marks, database rights, and all other proprietary or similar rights)
+          in and to all work, inventions, discoveries, developments, improvements,
+          software, code, know-how, processes, and materials created, developed, or
+          conceived by such Founder, whether solely or jointly, in connection with the
+          business of {{ company_name }}, whether arising before or after the date of
+          this Agreement. Each Founder agrees to execute any further instruments,
+          documents, or deeds reasonably required by {{ company_name }} to give effect
+          to, perfect, or register this assignment in any jurisdiction, at the
+          Company's cost. A Founder may retain rights to pre-existing intellectual
+          property created entirely outside the scope of the Company's business,
+          provided such pre-existing IP is identified and listed in an annexure to this
+          Agreement executed at or before the date of this Agreement.
+        plain_note_template: >
+          Everything a founder creates for the company belongs to the company, not to
+          them personally. Pre-existing personal IP (listed separately) can be kept.
+    default_variant_id: default
+
+  - id: decision_making_clause
+    title: "Decision Making"
+    resolution: deterministic
+    condition_field: decision_making_mode
+    variants:
+      unanimous:
+        body_template: >
+          Major decisions of {{ company_name }} shall require the unanimous written
+          consent of all Founders ({{ founder_names }}), whether passed at a duly
+          convened board or founders' meeting or by written resolution. "Major
+          decisions" include without limitation: amendment of the articles of
+          association or this Agreement; issuance of new equity or convertible
+          securities; entry into any debt financing above INR 10,00,000 (Rupees Ten
+          Lakhs); acquisition or disposal of any material asset; entry into or
+          termination of any material contract; any transaction between the Company and
+          a Founder or a related party; any material change in the nature or scope of
+          the Company's business; and approval of the annual operating budget. Routine
+          operational and day-to-day decisions may be taken by individual Founders in
+          accordance with their respective roles.
+        plain_note_template: >
+          All big decisions require every founder to agree. Day-to-day operations can
+          be managed individually.
+      majority:
+        body_template: >
+          Major decisions of {{ company_name }} shall require the written approval of a
+          majority of the Founders ({{ founder_names }}), measured by number of
+          Founders rather than by shareholding. "Major decisions" include without
+          limitation: amendment of the articles of association or this Agreement;
+          issuance of new equity or convertible securities; entry into any debt
+          financing above INR 10,00,000 (Rupees Ten Lakhs); acquisition or disposal
+          of any material asset; entry into or termination of any material contract;
+          any transaction between the Company and a Founder or a related party; any
+          material change in the nature or scope of the Company's business; and
+          approval of the annual operating budget. Routine operational and day-to-day
+          decisions may be taken by individual Founders in accordance with their roles.
+        plain_note_template: >
+          Most big decisions need a majority of founders (by head count) to agree.
+          Day-to-day operations can be handled individually.
+      single_ceo:
+        body_template: >
+          The Founder designated as Chief Executive Officer ("CEO") of {{ company_name }}
+          from time to time shall have authority to make all day-to-day and operational
+          decisions on behalf of the Company. However, the following reserved matters
+          shall require the prior written consent of all Founders ({{ founder_names }}),
+          regardless of the CEO's authority: amendment of the articles of association
+          or this Agreement; issuance of new equity or convertible securities; entry
+          into any debt financing above INR 10,00,000 (Rupees Ten Lakhs); acquisition
+          or disposal of any material asset; any transaction between the Company and a
+          Founder or a related party; any material change in the nature or scope of
+          the Company's business; and appointment or removal of the CEO. The designation
+          of a Founder as CEO and any change to such designation shall require the
+          written consent of a majority of the Founders.
+        plain_note_template: >
+          The CEO can make day-to-day decisions alone, but major decisions (listed
+          above) still need all founders to agree.
+    default_variant_id: majority
+
+  - id: deadlock_resolution_clause
+    title: "Deadlock Resolution"
+    resolution: static
+    variants:
+      default:
+        body_template: >
+          If the Founders are unable to reach agreement on any Major Decision within
+          fifteen (15) days of the matter being formally raised in writing ("Deadlock"),
+          the Founders shall: (a) within a further fifteen (15) days, meet in good
+          faith to attempt to resolve the Deadlock through direct discussion; and
+          (b) if the Deadlock remains unresolved after such discussion, refer the matter
+          to non-binding mediation before a mediator mutually agreed by the Founders
+          (or, if the Founders cannot agree on a mediator within seven (7) days,
+          appointed under the rules of the Indian Institute of Arbitration and
+          Mediation or such other body as the Founders may agree), the costs of which
+          shall be borne equally. If mediation fails to resolve the Deadlock within
+          thirty (30) days of the mediator's appointment (or such extended period as
+          the Founders unanimously agree), the Founders shall in good faith consider
+          whether to invoke a buy-out mechanism, restructure governance, or wind up
+          the Company. Nothing in this clause restricts any Founder from seeking
+          urgent interim relief from a court of competent jurisdiction.
+        plain_note_template: >
+          If founders cannot agree on a big decision, they first try to talk it out,
+          then try mediation. If all else fails, they consider a buyout or winding up.
+    default_variant_id: default
+
+  - id: founder_exit_clause
+    title: "Founder Exit"
+    resolution: static
+    variants:
+      default:
+        body_template: >
+          In the event that a Founder ceases to be employed by or actively engaged with
+          {{ company_name }} for any reason (whether by resignation, termination,
+          death, permanent incapacity, or otherwise) ("Exit"): (a) all unvested equity
+          of the exiting Founder shall be immediately forfeited to the Company without
+          any compensation; (b) the Company and/or the remaining Founders (in that
+          order of priority) shall have the right, exercisable within ninety (90) days
+          of the Exit, to purchase the exiting Founder's vested equity at fair market
+          value as determined by a mutually agreed independent valuer (or if no valuer
+          is agreed within fifteen (15) days, at a price determined pursuant to the
+          articles of association); and (c) if such right to purchase is not exercised
+          within ninety (90) days, the exiting Founder shall retain their vested equity
+          subject to the terms of the articles of association and this Agreement.
+          For a period of two (2) years following Exit, the exiting Founder shall:
+          (i) hold all Confidential Information of {{ company_name }} in strict
+          confidence; and (ii) not directly or indirectly solicit or induce any
+          employee, officer, or consultant of {{ company_name }} to leave their
+          position, or solicit any customer or client of {{ company_name }} with whom
+          the exiting Founder had material dealings in the twenty-four (24) months
+          prior to Exit. For the avoidance of doubt, nothing in this Agreement
+          restricts the exiting Founder from engaging in any trade, profession, or
+          business activity of their choice after Exit. Any provision purporting to
+          prevent an exiting Founder from carrying on any profession, trade, or business
+          after Exit would be void under Section 27 of the Indian Contract Act, 1872,
+          and is therefore not included in this Agreement.
+        plain_note_template: >
+          A leaving founder loses unvested equity. The Company/remaining founders can
+          buy out the vested equity at fair market value within 90 days. Post-exit:
+          confidentiality and no-poaching obligations apply for 2 years, but the
+          founder is otherwise free to work on whatever they choose. A non-compete
+          after exit is void under Indian law and is not in this agreement.
+    default_variant_id: default
+
+  - id: governing_law_clause
+    title: "Governing Law and Jurisdiction"
+    resolution: static
+    variants:
+      default:
+        body_template: >
+          This Agreement and any dispute or claim arising out of or in connection with
+          it, including any non-contractual dispute or claim, shall be governed by,
+          and construed in accordance with, the laws of India. The courts at
+          {{ registered_office_city }}, India, shall have exclusive jurisdiction to
+          adjudicate any dispute arising from or in connection with this Agreement,
+          and the Founders irrevocably submit to such jurisdiction and waive any
+          objection to proceedings on grounds of venue or that the proceedings have
+          been brought in an inconvenient forum.
+        plain_note_template: >
+          Disputes are handled under Indian law in the courts of
+          {{ registered_office_city }}.
+    default_variant_id: default
+
+  - id: stamp_duty_note
+    title: "Stamp Duty"
+    resolution: static
+    variants:
+      default:
+        body_template: >
+          This Agreement may be liable to stamp duty in the state where it is executed,
+          under the Indian Stamp Act, 1899, or the applicable state Stamp Act. For a
+          Founders' Agreement recording equity rights and obligations, the applicable
+          stamp duty may be significant in certain states and may be calculated
+          differently depending on the nature of the rights recorded and the state of
+          execution. The Founders are strongly advised to consult a legal adviser to
+          determine the applicable stamp duty and to ensure this Agreement is duly
+          stamped before it is signed or relied upon in any legal proceedings.
+        plain_note_template: >
+          Stamp duty on a founders' agreement can be significant in some states.
+          Get legal advice on what applies in your state before signing.
+    default_variant_id: default

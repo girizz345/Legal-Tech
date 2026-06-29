@@ -1,0 +1,278 @@
+key: offer_letter
+name: "Offer / Employment Letter"
+version: 2
+
+fields:
+  - id: employment_type
+    label: "Employment Type"
+    type: select
+    options: [permanent, fixed_term, intern]
+    required: true
+  - id: employee_name
+    label: "Employee Name"
+    type: text
+    required: true
+  - id: designation
+    label: "Designation"
+    type: text
+    required: true
+  - id: start_date
+    label: "Start Date"
+    type: date
+    required: true
+  - id: monthly_compensation
+    label: "Monthly Compensation (INR)"
+    type: number
+    min: 0
+    required: true
+  - id: probation_months
+    label: "Probation period (months)"
+    type: number
+    min: 0
+    max: 12
+    required: true
+  - id: notice_period_days
+    label: "Notice period (days)"
+    type: number
+    min: 0
+    max: 180
+    required: true
+  - id: role_summary
+    label: "Role summary (one line)"
+    type: text
+    max_length: 140
+    required: true
+    help_text: "A short plain-English description, e.g. 'individual contributor software engineer'."
+  - id: work_location_city
+    label: "Work location city"
+    type: text
+    required: true
+
+sections:
+  - id: employment_type_clause
+    title: "Nature of Employment"
+    resolution: deterministic
+    condition_field: employment_type
+    variants:
+      permanent:
+        body_template: >
+          {{ employee_name }} is hereby offered a permanent, full-time position with
+          the Company as {{ designation }}, effective from {{ start_date }}. This
+          employment is of a continuing nature and is not for any fixed term. The
+          monthly cost to the Company (CTC) for this position is INR
+          {{ monthly_compensation }}, the detailed breakup of which shall be provided
+          separately. This offer is conditional on successful completion of background
+          verification and the submission of all documents required by the Company
+          prior to or on the date of joining.
+        plain_note_template: >
+          This is a regular, open-ended job offer — not limited to a specific
+          duration.
+      fixed_term:
+        body_template: >
+          {{ employee_name }} is hereby offered a fixed-term position with the Company
+          as {{ designation }}, commencing {{ start_date }}. The monthly cost to the
+          Company (CTC) for this position is INR {{ monthly_compensation }}. The
+          specific duration and end date of the fixed term shall be as set out in the
+          accompanying engagement terms. The Company makes no representation as to
+          renewal of this engagement at the expiry of the fixed term, and this letter
+          shall not give rise to any expectation of permanent employment. This offer
+          is conditional on successful completion of background verification and the
+          submission of all documents required by the Company prior to or on the date
+          of joining.
+        plain_note_template: >
+          This job has a defined end date. There is no promise of renewal or of
+          converting to a permanent role.
+      intern:
+        body_template: >
+          {{ employee_name }} is hereby offered an internship with the Company as
+          {{ designation }}, commencing {{ start_date }}. A monthly stipend of INR
+          {{ monthly_compensation }} shall be paid for the duration of the internship.
+          The internship is offered for the period specified in the accompanying
+          engagement terms. This internship does not constitute an offer of employment
+          or engagement, and the Company makes no representation as to any offer of
+          employment at the conclusion of the internship period.
+        plain_note_template: >
+          This is an internship with a stipend, not a regular employment offer. There
+          is no promise of a job at the end.
+    default_variant_id: permanent
+
+  - id: probation_clause
+    title: "Probation"
+    resolution: static
+    variants:
+      default:
+        body_template: >
+          {{ employee_name }}'s employment is subject to a probationary period of
+          {{ probation_months }} months from {{ start_date }} ("Probation Period").
+          During the Probation Period, the Company reserves the right to terminate the
+          employment at any time by giving shorter notice than that applicable after
+          confirmation. The Probation Period may be extended at the Company's sole
+          discretion if performance so warrants. Confirmation of employment is
+          conditional on a satisfactory performance review conducted at the end of the
+          Probation Period.
+        plain_note_template: >
+          The first {{ probation_months }} months are a trial period. Either side can
+          end things more easily during this time, and the Company can extend it if
+          needed.
+    default_variant_id: default
+
+  - id: notice_period_clause
+    title: "Notice Period"
+    resolution: static
+    variants:
+      default:
+        body_template: >
+          After confirmation of employment (i.e., on successful completion of the
+          Probation Period), either the Company or {{ employee_name }} may terminate
+          the employment by providing a minimum of {{ notice_period_days }} days'
+          written notice to the other party. The Company reserves the right, at its
+          sole discretion, to accept payment of salary in lieu of the notice period
+          or to require {{ employee_name }} to serve the notice period without
+          actively performing duties (garden leave). During the notice period,
+          {{ employee_name }} shall continue to perform all assigned duties and shall
+          not solicit any client, customer, or employee of the Company.
+        plain_note_template: >
+          After probation, either side must give {{ notice_period_days }} days' notice
+          to end the employment. The Company can choose to pay out the notice period
+          instead.
+    default_variant_id: default
+
+  - id: duties_clause
+    title: "Role and Duties"
+    resolution: llm_classify
+    source_field: role_summary
+    variants:
+      individual_contributor:
+        body_template: >
+          {{ employee_name }} shall diligently perform the duties and responsibilities
+          of an individual contributor in the {{ designation }} role, under the
+          direction of the reporting manager assigned by the Company. The principal
+          place of work shall be {{ work_location_city }}, subject to the Company's
+          right to require {{ employee_name }} to work from such other locations as
+          may be necessary for business purposes from time to time. {{ employee_name }}
+          shall devote full time and attention to the duties of this role during
+          working hours and shall not, without the prior written consent of the
+          Company, engage in any other paid employment, consultancy, or business
+          activity that conflicts with the Company's interests.
+        plain_note_template: >
+          This is an individual-contributor role (no people management). The primary
+          work location is {{ work_location_city }}.
+      managerial:
+        body_template: >
+          {{ employee_name }} shall perform the duties and responsibilities of the
+          {{ designation }} role, which include the supervision and leadership of the
+          team(s) assigned to this position, based principally at
+          {{ work_location_city }}. {{ employee_name }} shall be accountable for the
+          performance, delivery, and conduct of direct reports, and shall comply with
+          the Company's people-management policies and applicable labour law
+          obligations as a manager. {{ employee_name }} shall devote full time and
+          attention to these duties and shall not engage in any conflicting employment
+          or business activity without the prior written consent of the Company.
+        plain_note_template: >
+          This is a management role that includes supervising a team, based in
+          {{ work_location_city }}.
+      sales_incentive:
+        body_template: >
+          {{ employee_name }} shall perform the duties and responsibilities of the
+          {{ designation }} role, including client engagement, business development,
+          and sales functions, based principally at {{ work_location_city }}.
+          In addition to the monthly CTC, {{ employee_name }} may be eligible for
+          incentive or commission payments, the structure, targets, and payment terms
+          of which shall be communicated separately in writing by the Company from
+          time to time. The Company reserves the right to revise the incentive
+          structure with reasonable notice. All incentive and commission payments are
+          discretionary and conditional on achieving applicable targets; no incentive
+          payment shall be deemed guaranteed income.
+        plain_note_template: >
+          This is a sales/business development role in {{ work_location_city }} that
+          may include variable incentive pay — structure and targets will be shared
+          separately.
+      technical_specialist:
+        body_template: >
+          {{ employee_name }} shall perform the duties and responsibilities of the
+          {{ designation }} role as a specialist in the relevant technical domain,
+          based principally at {{ work_location_city }}. {{ employee_name }} shall
+          apply specialist technical knowledge and expertise to deliver outcomes as
+          directed, maintain current proficiency in relevant technology areas, and
+          contribute to the Company's technical direction as appropriate to the
+          seniority of this role. {{ employee_name }} shall devote full time and
+          attention to these duties and shall not engage in any conflicting technical
+          services engagement or employment without the prior written consent of the
+          Company.
+        plain_note_template: >
+          This is a specialist technical role in {{ work_location_city }} — depth of
+          expertise is the primary contribution.
+    default_variant_id: individual_contributor
+
+  - id: confidentiality_and_nonsolicit_clause
+    title: "Confidentiality and Non-Solicitation"
+    resolution: static
+    variants:
+      default:
+        body_template: >
+          {{ employee_name }} acknowledges that during the course of employment, they
+          will have access to confidential, proprietary, and commercially sensitive
+          information belonging to the Company ("Confidential Information").
+          {{ employee_name }} agrees to: (a) hold all Confidential Information in
+          strict confidence during and after the term of employment; (b) use
+          Confidential Information solely in the performance of duties for the Company;
+          and (c) not disclose any Confidential Information to any third party without
+          the Company's prior written consent. These obligations survive termination
+          of employment without limit of time as to trade secrets, and for a period of
+          two (2) years following termination as to other Confidential Information.
+          For a period of one (1) year following termination of employment,
+          {{ employee_name }} shall not, directly or indirectly, solicit or induce any
+          employee, officer, or consultant of the Company to leave their position, or
+          solicit any client or customer of the Company with whom {{ employee_name }}
+          had material dealings during the twelve (12) months prior to termination.
+          Nothing in this letter restricts {{ employee_name }} from taking up any
+          employment or pursuing any occupation, trade, or profession after termination
+          of employment. Any clause purporting to restrain {{ employee_name }} from
+          exercising a lawful profession, trade, or business after termination would
+          be void under Section 27 of the Indian Contract Act, 1872, and is therefore
+          not included.
+        plain_note_template: >
+          After leaving: keep Company secrets confidential (always), and do not poach
+          staff or clients for 1 year. You are otherwise free to work anywhere.
+          A ban on working for a competitor is void under Indian law and is not in
+          this letter.
+    default_variant_id: default
+
+  - id: statutory_compliance_note
+    title: "Statutory Compliance"
+    resolution: static
+    variants:
+      default:
+        body_template: >
+          This employment and the compensation payable hereunder is subject to
+          applicable statutory requirements under the laws of India, including without
+          limitation: (a) the Employees' Provident Funds and Miscellaneous Provisions
+          Act, 1952, and the Employees' Provident Fund Scheme thereunder, as
+          applicable; (b) the Employees' State Insurance Act, 1948, as applicable;
+          (c) deduction of tax at source under the Income Tax Act, 1961; and (d) any
+          other applicable central or state labour legislation in force from time to
+          time. The Company shall comply with such obligations as are applicable to it
+          as an employer, and {{ employee_name }} shall extend all necessary
+          cooperation for such compliance including providing accurate documents and
+          declarations.
+        plain_note_template: >
+          Standard statutory deductions and benefits apply — PF, ESI, TDS, and so on
+          — in line with whichever central and state labour laws are applicable to
+          this role.
+    default_variant_id: default
+
+  - id: governing_law_clause
+    title: "Governing Law and Jurisdiction"
+    resolution: static
+    variants:
+      default:
+        body_template: >
+          This letter and any dispute or claim arising out of or in connection with it
+          shall be governed by, and construed in accordance with, the laws of India.
+          The courts at {{ work_location_city }} shall have exclusive jurisdiction to
+          settle any dispute or claim arising out of or in connection with this letter,
+          and each party irrevocably submits to such jurisdiction.
+        plain_note_template: >
+          Any dispute would be handled under Indian law in the courts of
+          {{ work_location_city }}.
+    default_variant_id: default

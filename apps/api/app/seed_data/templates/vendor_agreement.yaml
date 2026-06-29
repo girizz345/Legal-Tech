@@ -1,0 +1,300 @@
+key: vendor_agreement
+name: "Vendor / Service Agreement"
+version: 2
+
+fields:
+  - id: client_name
+    label: "Client Name"
+    type: text
+    required: true
+  - id: vendor_name
+    label: "Vendor Name"
+    type: text
+    required: true
+  - id: effective_date
+    label: "Effective Date"
+    type: date
+    required: true
+  - id: service_description
+    label: "Description of services (one line)"
+    type: text
+    max_length: 140
+    required: true
+    help_text: "A short plain-English description, e.g. 'custom software development'."
+  - id: contract_value
+    label: "Contract value (INR)"
+    type: number
+    min: 0
+    required: true
+  - id: payment_terms_days
+    label: "Payment due within (days)"
+    type: number
+    min: 1
+    max: 180
+    required: true
+  - id: dispute_resolution_mode
+    label: "Dispute resolution method"
+    type: select
+    options: [arbitration, courts]
+    required: true
+  - id: jurisdiction_city
+    label: "City for courts/arbitration seat"
+    type: text
+    required: true
+
+sections:
+  - id: scope_of_services_clause
+    title: "Scope of Services"
+    resolution: llm_classify
+    source_field: service_description
+    variants:
+      software_development:
+        body_template: >
+          {{ vendor_name }} ("Vendor") agrees to provide software development services
+          to {{ client_name }} ("Client") as more particularly described in a
+          statement of work ("SOW") executed by both Parties from time to time, which
+          shall form part of and be governed by this Agreement. The Vendor shall
+          allocate appropriately skilled personnel, apply reasonable professional care
+          and skill in delivering the services, and produce the deliverables and meet
+          the timelines specified in the relevant SOW. Unless otherwise specified in
+          the SOW, the Vendor shall have discretion as to the manner in which it
+          delivers the services, subject to meeting agreed specifications. Any changes
+          to scope shall be agreed in writing by both Parties through a change-order
+          process before being implemented.
+        plain_note_template: >
+          This agreement covers software development work. Each project phase will be
+          detailed in a statement of work.
+      consulting_services:
+        body_template: >
+          {{ vendor_name }} ("Vendor") agrees to provide consulting and advisory
+          services to {{ client_name }} ("Client") as more particularly described in
+          a statement of work ("SOW") executed by both Parties from time to time.
+          The Vendor shall apply reasonable professional skill, knowledge, and care
+          in providing the consulting services. The Vendor's obligation is to use
+          reasonable endeavours to provide well-considered recommendations and advice;
+          it does not guarantee any specific commercial outcome or result from the
+          engagement. Any reliance by the Client on the Vendor's advice is at the
+          Client's own commercial judgment and risk. Scope changes require written
+          agreement via a change order.
+        plain_note_template: >
+          This agreement covers consulting and advisory work. The Vendor advises;
+          business outcomes are not guaranteed.
+      marketing_services:
+        body_template: >
+          {{ vendor_name }} ("Vendor") agrees to provide marketing and promotional
+          services to {{ client_name }} ("Client") as more particularly described in
+          a statement of work ("SOW") executed by both Parties from time to time.
+          The Vendor shall execute the marketing activities, campaigns, and
+          deliverables specified in the relevant SOW, applying reasonable professional
+          skill and care. The Vendor makes no guarantee as to specific commercial,
+          brand, or revenue outcomes of any campaign, but shall use reasonable
+          endeavours to achieve agreed key performance indicators or targets specified
+          in the SOW. All marketing materials and content created by the Vendor shall
+          be subject to Client approval before publication. Scope changes require a
+          written change order.
+        plain_note_template: >
+          This agreement covers marketing work. Deliverables are defined in each
+          statement of work; campaign results are not guaranteed.
+      logistics_supply:
+        body_template: >
+          {{ vendor_name }} ("Vendor") agrees to provide logistics and supply services
+          to {{ client_name }} ("Client") as more particularly described in a
+          statement of work or purchase order ("SOW/PO") executed by both Parties from
+          time to time. The Vendor shall deliver the goods, materials, or logistics
+          services specified in the relevant SOW/PO in accordance with agreed timelines
+          and to the quality specifications described therein. Risk in goods shall pass
+          to the Client on delivery at the agreed delivery point. The Vendor shall
+          maintain appropriate insurance for goods in transit and shall be responsible
+          for ensuring goods are delivered in satisfactory condition.
+        plain_note_template: >
+          This agreement covers logistics and supply. Risk in goods passes on delivery;
+          the Vendor is responsible for insuring goods while in transit.
+      general_services:
+        body_template: >
+          {{ vendor_name }} ("Vendor") agrees to provide the services to
+          {{ client_name }} ("Client") as more particularly described in a statement
+          of work ("SOW") executed by both Parties from time to time, which shall form
+          part of and be governed by this Agreement. The Vendor shall perform the
+          services with reasonable professional skill and care, in accordance with the
+          timelines and specifications set out in the relevant SOW. Any changes to the
+          agreed scope of services shall be documented and approved in writing by both
+          Parties prior to implementation.
+        plain_note_template: >
+          General services framing — the specific work will be set out in each
+          statement of work.
+    default_variant_id: general_services
+
+  - id: payment_terms_clause
+    title: "Payment Terms"
+    resolution: static
+    variants:
+      default:
+        body_template: >
+          In consideration of the services rendered under this Agreement,
+          {{ client_name }} shall pay {{ vendor_name }} a total contract value of INR
+          {{ contract_value }} (exclusive of applicable taxes), in accordance with the
+          invoicing schedule set out in the relevant SOW or as separately agreed in
+          writing. All valid, undisputed invoices raised by {{ vendor_name }} shall be
+          payable within {{ payment_terms_days }} days of the date of receipt of the
+          invoice. Any amounts remaining unpaid beyond the due date shall attract
+          interest at the rate of 18% per annum (or the maximum rate permissible under
+          applicable law, whichever is lower) on the outstanding amount, calculated
+          from the due date until actual payment. All applicable Goods and Services Tax
+          (GST) shall be charged separately on the invoice, and {{ client_name }} shall
+          be responsible for the same. {{ client_name }} shall deduct tax at source
+          (TDS) as required under the Income Tax Act, 1961, and shall furnish
+          {{ vendor_name }} with TDS certificates promptly and in any event within the
+          time prescribed under applicable law.
+        plain_note_template: >
+          Total contract value: INR {{ contract_value }} (plus GST). Invoices are due
+          within {{ payment_terms_days }} days. Late payment attracts interest. TDS
+          will be deducted as required by law.
+    default_variant_id: default
+
+  - id: indemnity_clause
+    title: "Indemnity"
+    resolution: static
+    variants:
+      default:
+        body_template: >
+          Each Party ("Indemnifying Party") agrees to defend, indemnify, and hold
+          harmless the other Party and its directors, officers, employees, and agents
+          ("Indemnified Party") from and against any losses, damages, liabilities,
+          costs, and reasonable legal expenses arising out of or in connection with:
+          (a) any breach by the Indemnifying Party of any representation, warranty,
+          obligation, or undertaking under this Agreement; (b) the Indemnifying
+          Party's gross negligence or wilful misconduct; or (c) any infringement of
+          a third party's intellectual property rights by materials or deliverables
+          contributed solely by the Indemnifying Party. The Indemnified Party shall:
+          (i) give the Indemnifying Party prompt written notice of any claim for which
+          indemnification is sought; (ii) give the Indemnifying Party sole control
+          over the defence and settlement of such claim, provided that no settlement
+          shall admit liability of or impose any obligation on the Indemnified Party
+          without its prior written consent; and (iii) provide reasonable cooperation
+          to the Indemnifying Party, at the Indemnifying Party's cost and expense.
+        plain_note_template: >
+          Each side is responsible for covering the other's losses caused by its own
+          breach, negligence, or wilful misconduct.
+    default_variant_id: default
+
+  - id: limitation_of_liability_clause
+    title: "Limitation of Liability"
+    resolution: static
+    variants:
+      default:
+        body_template: >
+          To the maximum extent permitted by applicable law: (a) neither Party shall
+          be liable to the other for any indirect, consequential, special, incidental,
+          or punitive damages, including loss of profits, loss of revenue, or loss of
+          data, arising out of or in connection with this Agreement, whether in
+          contract, tort, or otherwise, even if advised of the possibility of such
+          damages; and (b) each Party's aggregate liability under or in connection with
+          this Agreement shall not exceed the total value paid or payable by
+          {{ client_name }} to {{ vendor_name }} under this Agreement, i.e., INR
+          {{ contract_value }}. The limitations and exclusions in this clause shall
+          not apply to: (i) liability for death or personal injury caused by a Party's
+          negligence; (ii) liability for fraud or fraudulent misrepresentation;
+          (iii) liability for wilful misconduct; or (iv) a Party's obligations to
+          indemnify the other arising from a breach of confidentiality.
+        plain_note_template: >
+          Neither side is liable for indirect losses (lost profits, etc.). Total
+          liability is capped at the contract value (INR {{ contract_value }}), with
+          a few important exceptions (fraud, wilful misconduct, confidentiality breach).
+    default_variant_id: default
+
+  - id: termination_clause
+    title: "Termination"
+    resolution: static
+    variants:
+      default:
+        body_template: >
+          Either Party may terminate this Agreement for convenience by providing thirty
+          (30) days' prior written notice to the other Party, unless a longer notice
+          period is specified in the relevant SOW. Either Party may terminate this
+          Agreement immediately by written notice if the other Party: (a) commits a
+          material breach of this Agreement and fails to remedy such breach within
+          fifteen (15) days of receiving written notice specifying the breach in
+          reasonable detail; (b) becomes insolvent, is unable to pay its debts as they
+          fall due, or a liquidator, receiver, administrator, or similar officer is
+          appointed over the whole or a material part of its business or assets; or
+          (c) ceases or threatens to cease to carry on business. Upon termination or
+          expiry: (i) {{ vendor_name }} shall cease providing services and deliver all
+          work product and materials to {{ client_name }} in a useable format;
+          (ii) {{ client_name }} shall pay {{ vendor_name }} for all services properly
+          rendered up to the effective date of termination; and (iii) provisions that
+          by their nature survive termination (including confidentiality, intellectual
+          property, payment, limitation of liability, and governing law) shall continue
+          in full force and effect.
+        plain_note_template: >
+          Either side can end this agreement with 30 days' notice, or immediately for
+          a serious uncured breach or insolvency. On ending, outstanding payments are
+          due and key obligations (confidentiality, etc.) continue.
+    default_variant_id: default
+
+  - id: dispute_resolution_clause
+    title: "Dispute Resolution"
+    resolution: deterministic
+    condition_field: dispute_resolution_mode
+    variants:
+      arbitration:
+        body_template: >
+          Any dispute, controversy, or claim arising out of or in connection with this
+          Agreement, or the breach, termination, or invalidity thereof ("Dispute"),
+          shall be referred to and finally resolved by arbitration in accordance with
+          the Arbitration and Conciliation Act, 1996 (as amended from time to time).
+          The arbitration shall be conducted by a sole arbitrator mutually agreed by
+          the Parties in writing, or if the Parties fail to agree within fifteen (15)
+          days of a written request for appointment, appointed in accordance with the
+          provisions of the said Act. The seat and venue of arbitration shall be
+          {{ jurisdiction_city }}, India. The language of the proceedings shall be
+          English. The arbitral award shall be final and binding on the Parties and
+          enforceable in any court of competent jurisdiction. Pending resolution of any
+          Dispute, both Parties shall continue to perform their respective obligations
+          under this Agreement to the extent practicable.
+        plain_note_template: >
+          Disputes go to a private arbitrator in {{ jurisdiction_city }} under the
+          Arbitration and Conciliation Act, 1996 — not to court (unless enforcing
+          the award).
+      courts:
+        body_template: >
+          Any dispute, controversy, or claim arising out of or in connection with this
+          Agreement, or the breach, termination, or invalidity thereof, shall be
+          subject to the exclusive jurisdiction of the courts at {{ jurisdiction_city }},
+          India. Each Party irrevocably submits to the personal jurisdiction of such
+          courts and waives any objection to proceedings on grounds of venue or that
+          the proceedings have been brought in an inconvenient forum.
+        plain_note_template: >
+          Disputes go to the regular courts in {{ jurisdiction_city }}.
+    default_variant_id: courts
+
+  - id: governing_law_clause
+    title: "Governing Law"
+    resolution: static
+    variants:
+      default:
+        body_template: >
+          This Agreement shall be governed by, and construed in accordance with, the
+          laws of India, without regard to its conflict of laws provisions. The United
+          Nations Convention on Contracts for the International Sale of Goods shall not
+          apply to this Agreement.
+        plain_note_template: >
+          Indian law governs this agreement. International sale-of-goods treaty rules
+          are excluded.
+    default_variant_id: default
+
+  - id: stamp_duty_note
+    title: "Stamp Duty"
+    resolution: static
+    variants:
+      default:
+        body_template: >
+          This Agreement may be liable to stamp duty under the Indian Stamp Act, 1899,
+          or the applicable state Stamp Act of the state in which it is executed or
+          acted upon. The Parties shall ensure that this Agreement is duly stamped
+          before it is signed or used as evidence in any proceedings. The applicable
+          stamp duty varies by state and by the nature and value of the transaction;
+          Parties should consult a legal adviser to confirm the duty payable in their
+          specific jurisdiction.
+        plain_note_template: >
+          Stamp duty rules vary by state. Check what applies before signing.
+    default_variant_id: default

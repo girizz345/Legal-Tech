@@ -1,0 +1,197 @@
+key: nda
+name: "Non-Disclosure Agreement"
+version: 2
+
+fields:
+  - id: nda_type
+    label: "Type of NDA"
+    type: select
+    options: [mutual, unilateral]
+    required: true
+  - id: disclosing_party_name
+    label: "Disclosing Party Name"
+    type: text
+    required: true
+  - id: receiving_party_name
+    label: "Receiving Party Name"
+    type: text
+    required: true
+  - id: effective_date
+    label: "Effective Date"
+    type: date
+    required: true
+  - id: purpose_of_disclosure
+    label: "Purpose of disclosure (one line)"
+    type: text
+    max_length: 140
+    required: true
+    help_text: "A short plain-English description, e.g. 'evaluating a potential partnership'."
+  - id: term_months
+    label: "Confidentiality term (months)"
+    type: number
+    min: 1
+    max: 120
+    required: true
+  - id: jurisdiction_city
+    label: "Courts of which city will have jurisdiction"
+    type: text
+    required: true
+
+sections:
+  - id: confidentiality_obligation
+    title: "Confidentiality Obligation"
+    resolution: deterministic
+    condition_field: nda_type
+    variants:
+      mutual:
+        body_template: >
+          {{ disclosing_party_name }} and {{ receiving_party_name }} (each a "Party"
+          and together the "Parties") hereby agree that each Party, as a recipient of
+          the other's Confidential Information, shall: (a) hold such Confidential
+          Information in strict confidence; (b) use it solely for the Purpose stated in
+          this Agreement; (c) not disclose it to any third party without the prior
+          written consent of the disclosing Party; and (d) apply at least the same
+          degree of care to protect it as each applies to its own confidential
+          information, being no less than reasonable care. "Confidential Information"
+          means all non-public information disclosed by a Party, whether oral, written,
+          or in any other form, that is designated as confidential or that reasonably
+          ought to be understood as confidential given the nature of the information
+          and the circumstances of disclosure. The obligations under this clause shall
+          not apply to information that: (i) is or becomes publicly available through
+          no fault of the recipient; (ii) was rightfully known to the recipient without
+          restriction prior to disclosure; (iii) is rightfully received from a third
+          party without restriction; or (iv) is required to be disclosed by applicable
+          law or court order, provided the recipient gives prompt written notice to the
+          disclosing Party to the extent permitted by law.
+        plain_note_template: >
+          Both {{ disclosing_party_name }} and {{ receiving_party_name }} are sharing
+          confidential information, so both sides must protect what the other shares
+          and can only use it for the stated purpose.
+      unilateral:
+        body_template: >
+          {{ receiving_party_name }} ("Recipient") hereby agrees to hold all
+          Confidential Information disclosed by {{ disclosing_party_name }}
+          ("Disclosing Party") in strict confidence, to use it solely for the Purpose
+          stated in this Agreement, and not to disclose it to any third party without
+          the Disclosing Party's prior written consent. The Recipient shall apply at
+          least the same degree of care to protect the Confidential Information as it
+          applies to its own confidential information, being no less than reasonable
+          care. "Confidential Information" means all non-public information disclosed
+          by the Disclosing Party, whether oral, written, or in any other form, that
+          is designated as confidential or that reasonably ought to be understood as
+          confidential. The obligations under this clause shall not apply to
+          information that: (i) is or becomes publicly available through no fault of
+          the Recipient; (ii) was rightfully known to the Recipient without restriction
+          prior to disclosure; (iii) is rightfully received from a third party without
+          restriction; or (iv) is required to be disclosed by applicable law or court
+          order, provided the Recipient gives prompt written notice to the Disclosing
+          Party to the extent permitted by law.
+        plain_note_template: >
+          Only {{ disclosing_party_name }} is sharing confidential information here;
+          {{ receiving_party_name }} must keep it secret and only use it for the
+          stated purpose.
+    default_variant_id: mutual
+
+  - id: purpose_clause
+    title: "Purpose of Disclosure"
+    resolution: llm_classify
+    source_field: purpose_of_disclosure
+    variants:
+      evaluating_partnership:
+        body_template: >
+          The Confidential Information is disclosed solely for the purpose of
+          evaluating a potential business partnership, joint venture, or collaboration
+          between the Parties ("Purpose"). The Parties acknowledge that disclosure for
+          this Purpose does not constitute a commitment by either Party to enter into
+          any such arrangement, and either Party may withdraw from discussions at any
+          time without liability.
+        plain_note_template: >
+          This NDA covers sharing information while exploring a potential partnership.
+          Neither side is committed to going ahead just by signing this.
+      due_diligence:
+        body_template: >
+          The Confidential Information is disclosed solely for the purpose of due
+          diligence in connection with a potential acquisition, investment, merger, or
+          other transaction involving the Parties or their affiliates ("Purpose").
+          Disclosure for this Purpose does not constitute a commitment by either Party
+          to proceed with any such transaction, and either Party may discontinue
+          discussions at any time without liability.
+        plain_note_template: >
+          This NDA covers information sharing for a deal (investment, acquisition, or
+          merger). No one is committed to the deal just because they signed this.
+      employment_discussion:
+        body_template: >
+          The Confidential Information is disclosed solely for the purpose of
+          exploring and evaluating a potential employment, consultancy, or professional
+          engagement relationship between the Parties ("Purpose"). Disclosure for this
+          Purpose does not constitute an offer of employment or engagement, and either
+          Party may withdraw from discussions at any time without liability.
+        plain_note_template: >
+          This NDA covers information shared while discussing a possible job or
+          engagement. Signing this doesn't mean an offer is being made.
+      general_business:
+        body_template: >
+          The Confidential Information is disclosed solely for the purpose of
+          facilitating general business discussions between the Parties ("Purpose").
+          Disclosure for this Purpose does not constitute a commitment by either Party
+          to enter into any business arrangement, and either Party may withdraw from
+          discussions at any time without liability.
+        plain_note_template: >
+          This NDA covers general business discussions. Neither side is locked into
+          any arrangement just by signing this.
+    default_variant_id: general_business
+
+  - id: term_clause
+    title: "Term"
+    resolution: static
+    variants:
+      default:
+        body_template: >
+          The confidentiality obligations under this Agreement shall commence on the
+          Effective Date of {{ effective_date }} and continue in force for a period of
+          {{ term_months }} months, unless sooner terminated by written agreement of
+          the Parties. Notwithstanding the foregoing, each Party's obligations with
+          respect to any Confidential Information that constitutes a trade secret shall
+          continue for as long as such information remains a trade secret under
+          applicable law. On expiry or termination of this Agreement, each Party shall,
+          on request by the other Party, promptly return or securely destroy all
+          Confidential Information received from the other Party and certify the same
+          in writing.
+        plain_note_template: >
+          The secrecy obligation lasts {{ term_months }} months from {{ effective_date }}.
+          Trade secrets stay protected even after that. On ending, each side gives back
+          or destroys what the other shared.
+    default_variant_id: default
+
+  - id: governing_law_clause
+    title: "Governing Law and Jurisdiction"
+    resolution: static
+    variants:
+      default:
+        body_template: >
+          This Agreement shall be governed by, and construed in accordance with, the
+          laws of India. The courts at {{ jurisdiction_city }} shall have exclusive
+          jurisdiction to adjudicate any dispute arising out of or in connection with
+          this Agreement, and the Parties irrevocably submit to such jurisdiction.
+        plain_note_template: >
+          If there is ever a dispute, it is handled under Indian law in the courts of
+          {{ jurisdiction_city }}.
+    default_variant_id: default
+
+  - id: stamp_duty_note
+    title: "Stamp Duty"
+    resolution: static
+    variants:
+      default:
+        body_template: >
+          This Agreement may be liable to stamp duty in the state where it is executed
+          or where any Party is located, under the Indian Stamp Act, 1899, or the
+          applicable state Stamp Act. The Parties are responsible for ensuring this
+          Agreement is duly stamped prior to execution or use as evidence in any
+          proceedings. The duty applicable varies by state; Parties are advised to
+          consult a legal adviser to determine the applicable stamp duty for their
+          specific state.
+        plain_note_template: >
+          Stamp duty rules vary by Indian state. Check what applies in your state
+          before signing — this note is not state-specific advice.
+    default_variant_id: default
