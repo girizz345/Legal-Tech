@@ -20,7 +20,7 @@ export default function PreviewPage() {
     if (!token) { router.replace("/login"); return; }
     getContractContent(token, contractId)
       .then(setContract)
-      .catch((e) => { if (e.message === "Not authenticated") { clearToken(); router.replace("/login"); } else setError(e.message); })
+      .catch((e: Error) => { if (e.message === "Not authenticated") { clearToken(); router.replace("/login"); } else setError(e.message); })
       .finally(() => setLoading(false));
   }, [contractId, router]);
 
@@ -109,7 +109,7 @@ export default function PreviewPage() {
                   <div style={{ fontFamily: "var(--font-garamond, Georgia, serif)", fontSize: "1rem", color: "var(--parchment)", lineHeight: 1.8, whiteSpace: "pre-wrap" }}>
                     {contract.content}
                   </div>
-                ) : sections.map((section, i) => {
+                ) : sections.map((section: string, i: number) => {
                   const isHeading = section.trim().length < 80 && /^[A-Z\s\d.:]+$/.test(section.trim().replace(/[^A-Z\s\d.:-]/g, "")) && !section.includes("\n");
                   const isNumbered = /^\d+[.)]\s/.test(section.trim());
                   return (
