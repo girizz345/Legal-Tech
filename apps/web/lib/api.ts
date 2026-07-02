@@ -143,6 +143,19 @@ export async function updateAnswers(
     body: JSON.stringify({ answers }),
   })).json();
 }
+export interface ContractContent {
+  contract_id: string;
+  content: string;
+}
+
+export async function getContractContent(token: string, contractId: string): Promise<ContractContent> {
+  const detail = await getContract(token, contractId);
+  const content = detail.sections
+    .map((section) => `${section.title}\n\n${section.body_text}`)
+    .join("\n\n");
+  return { contract_id: detail.contract_id, content };
+}
+
 export async function downloadFile(token: string, contractId: string, format: "pdf" | "docx"): Promise<void> {
   const res = await authedFetch(`/documents/${contractId}/download?format=${format}`, token);
   const blob = await res.blob();
